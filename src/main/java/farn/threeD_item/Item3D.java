@@ -2,11 +2,14 @@ package farn.threeD_item;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
+import net.minecraft.block.TorchBlock;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.modificationstation.stationapi.api.StationAPI;
 import net.modificationstation.stationapi.api.client.texture.Sprite;
 import net.modificationstation.stationapi.api.client.texture.SpriteAtlasTexture;
 import net.modificationstation.stationapi.api.item.BlockItemForm;
@@ -33,16 +36,11 @@ public class Item3D {
         glPushMatrix();
         glTranslatef(x, y + yOffset, z);
         Block block;
-        if (stack.getItem() instanceof BlockItemForm blockItemForm && BlockRenderManager.isSideLit((block = blockItemForm.getBlock()).getRenderType())) {
+        if (stack.getItem() instanceof BlockItemForm blockItemForm && BlockRenderManager.isSideLit((block = blockItemForm.getBlock()).getRenderType()) && !(blockItemForm.getBlock() instanceof TorchBlock)) {
             glRotatef(rotateOffset, 0.0F, 1.0F, 0.0F);
             atlas.bindTexture();
             float renderScale = 0.25F;
-            int renderType = block.getRenderType();
-            if (renderType == 1 || renderType == 19 || renderType == 12 || renderType == 2) {
-                renderScale = 0.5F;
-            }
-
-            glScalef(renderScale, renderScale, renderScale);
+            glScalef(0.25F, 0.25F, 0.25F);
 
             for (int loopIndex = 0; loopIndex < renderedAmount; ++loopIndex) {
                 glPushMatrix();
