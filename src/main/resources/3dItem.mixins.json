@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "farn.threeD_item.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "ArsenicItemRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

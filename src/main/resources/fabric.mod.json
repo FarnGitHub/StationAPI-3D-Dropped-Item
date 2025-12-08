@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "item_3d",
+  "version": "${version}",
+  "name": "3D Dropped Item",
+  "description": "Render dropped item as 3D",
+  "authors": [
+    "farnfarn02"
+  ],
+  "icon": "farn/threeD_item/icon.png",
+  "license": "MIT",
+  "environment": "client",
+  "mixins": [
+    "3dItem.mixins.json"
+  ],
+  "entrypoints": {
+    "gcapi3": [
+      "farn.threeD_item.GCAPI_Handler"
+    ]
+  },
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "stationapi": "*"
+  }
+}
