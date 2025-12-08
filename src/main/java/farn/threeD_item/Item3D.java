@@ -62,7 +62,6 @@ public class Item3D {
             float maxU = sprite.getMaxU();
             float minV = sprite.getMinV();
             float maxV = sprite.getMaxV();
-            glRotatef((((float)item.age + delta) / 20.0F + item.initialRotationAngle) * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
             float smallNudge = 1.0F / 16.0F;
             float bigNudge = 7.0F / 320.0F;
             int count = stack.count;
@@ -77,7 +76,9 @@ public class Item3D {
                 mergeType = 4;
             }
             Tessellator tessellator = Tessellator.INSTANCE;
+            glPushMatrix();
             GL11.glScalef(0.5F, 0.5F, 0.5F);
+            glRotatef((((float)item.age + delta) / 20.0F + item.initialRotationAngle) * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
             glTranslatef(-0.5F, -0.25F, -((smallNudge + bigNudge) * (float) mergeType / 2.0F));
             for(int loopIndex = 0; loopIndex < mergeType; ++loopIndex) {
                 GL11.glTranslatef(0.0F, 0.0F, smallNudge + bigNudge);
@@ -88,7 +89,7 @@ public class Item3D {
 
             GL11.glPopMatrix();
         }
-        glPopMatrix();
+        GL11.glPopMatrix();
     }
 
     public static void renderItemModel(Tessellator var0, float var1, float var2, float var3, float var4, int var5, int var6, float var7) {
