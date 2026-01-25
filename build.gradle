@@ -286,3 +286,16 @@ static def fetchLatestVersion(String artifactUrl) {
 
     return latestVersion
 }
+
+loom {
+    runs {
+        client {
+            vmArgs "-Dmixin.debug.export=true"
+            vmArgs "-Dmixin.debug.verbose=true"
+        }
+        server {
+            vmArgs "-Dmixin.debug.export=true"
+            vmArgs "-Dmixin.debug.verbose=true"
+        }
+    }
+}

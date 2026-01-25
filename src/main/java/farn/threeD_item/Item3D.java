@@ -1,5 +1,6 @@
 package farn.threeD_item;
 
+import farn.threeD_item.mixin.BakedModelAccessor;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.TorchBlock;
@@ -7,13 +8,16 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.modificationstation.stationapi.api.StationAPI;
+import net.modificationstation.stationapi.api.client.render.model.BakedModel;
+import net.modificationstation.stationapi.api.client.render.model.BakedQuad;
 import net.modificationstation.stationapi.api.client.texture.Sprite;
 import net.modificationstation.stationapi.api.client.texture.SpriteAtlasTexture;
 import net.modificationstation.stationapi.api.item.BlockItemForm;
+import net.modificationstation.stationapi.api.util.math.Direction;
+import net.modificationstation.stationapi.api.util.math.MathHelper;
 import net.modificationstation.stationapi.impl.client.arsenic.renderer.render.ArsenicItemRenderer;
+import net.modificationstation.stationapi.impl.client.arsenic.renderer.render.BakedModelRendererImpl;
 import net.modificationstation.stationapi.mixin.arsenic.client.EntityRendererAccessor;
 import net.modificationstation.stationapi.mixin.arsenic.client.ItemRendererAccessor;
 import org.lwjgl.opengl.GL11;
@@ -30,6 +34,8 @@ public class Item3D {
     static ItemRenderer itemRenderer;
     static ItemRendererAccessor itemRendererAccessor;
     static EntityRendererAccessor entityRendererAccessor;
+    public static boolean renderDroppedItem = false;
+    public static boolean rotateJsonItem = true;
     public static boolean gcapiEnabled = FabricLoader.getInstance().isModLoaded("gcapi3");
 
     public static void render3DVanilla(ItemEntity item, float x, float y, float z, float delta, ItemStack stack, float yOffset, float rotateOffset, byte renderedAmount, SpriteAtlasTexture atlas) {
@@ -88,6 +94,19 @@ public class Item3D {
             GL11.glPopMatrix();
         }
         GL11.glPopMatrix();
+    }
+
+    public static void unflatedBakedModelRenderer(BakedModel model, ItemStack stack, float brightness, BakedModelRendererImpl impl) {
+        BakedModelAccessor accessor = (BakedModelAccessor)impl;
+        accessor.m3d_getRandom().setSeed(42L);
+        boolean bl = stack != null && stack.itemId != 0 && stack.count > 0;
+        for (BakedQuad bakedQuad : model.getQuads(null, null, accessor.m3d_getRandom())) {
+            int i = bl && bakedQuad.hasColor() ? accessor.m3d_itemColors().getColor(stack, bakedQuad.getColorIndex()) : -1;
+            float light = MathHelper.lerp(bakedQuad.getEmission(), brightness, 1F);
+            i = accessor.m3d_colorF2I(accessor.m3d_redI2F(i) * light, accessor.m3d_greenI2F(i) * light, accessor.m3d_blueI2F(i) * light);
+            Direction face = bakedQuad.getFace();
+            accessor.m3d_get_tessellator().quad(bakedQuad, 0, 0, 0, i, i, i, i, face.getOffsetX(), face.getOffsetY(), face.getOffsetZ(), false);
+        }
     }
 
     public static void renderItemModel(Tessellator var0, float var1, float var2, float var3, float var4, int var5, int var6, float var7) {
