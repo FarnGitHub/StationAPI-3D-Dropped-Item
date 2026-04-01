@@ -13,10 +13,9 @@ public abstract class BakedModelRendererMixin {
 
     @WrapMethod(method="renderBakedItemModelFlat")
     public void threeDfiedJsonModel(BakedModel model, ItemStack stack, float brightness, Operation<Void> original) {
-        if(Item3D.renderDroppedItem && Item3D.isEnabled()) {
-            Item3D.unflatedBakedModelRenderer(model, stack, brightness, (BakedModelRendererImpl) (Object) this);
-        } else {
+        if(Item3D.isEnabled())
+            Item3D.render3DGroundModel(model, stack, brightness, (BakedModelRendererImpl) (Object) this);
+        else
             original.call(model, stack, brightness);
-        }
     }
 }

@@ -1,13 +1,9 @@
 plugins {
     id 'maven-publish'
-    id 'net.fabricmc.fabric-loom-remap' version '1.15.+'
-    id 'ploceus' version '1.15-SNAPSHOT'
+    id 'fabric-loom' version '1.13.3'
+    id 'babric-loom-extension' version '1.13.3'
     id "com.modrinth.minotaur" version "2.+"
 }
-ploceus {
-	setIntermediaryGeneration(2)
-}
-
 
 version = property("mod_version")
 group = property("maven_group")
@@ -18,7 +14,7 @@ base {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -83,131 +79,109 @@ repositories {
     }
 
     mavenCentral()
-    maven { url = "https://maven.ornithemc.net/releases" }
-    maven { url = "https://mvn.devos.one/releases" }
-    maven { url = "https://matthewperiut.github.io/repository" }
 }
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings(ploceus.mappings("net.glasslauncher:biny-ornithe:b1.7.3+build.${project.biny_mappings}:mergedv2"))
-
-    clientExceptions ploceus.raven(project.client_raven_build, 'client')
-    serverExceptions ploceus.raven(project.server_raven_build, 'server')
-    clientSignatures ploceus.sparrow(project.client_sparrow_build, 'client')
-    serverSignatures ploceus.sparrow(project.server_sparrow_build, 'server')
-    "clientNests"("net.glasslauncher:biny-nests:b1.7.3-client+build.2")
-    "serverNests"("net.glasslauncher:biny-nests:b1.7.3-server+build.2")
+    mappings "net.glasslauncher:biny:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     implementation "org.slf4j:slf4j-api:1.8.0-beta4"
     implementation "org.apache.logging.log4j:log4j-slf4j18-impl:2.17.2"
     implementation "me.carleslc:Simple-Yaml:1.8.4"
 
-    modImplementation("net.modificationstation:StationAPI:${project.stapi_version}")
+    modImplementation("net.modificationstation:StationAPI:${project.stapi_version}") {
+        exclude group: "babric", module: "fabric-loader"
+    }
 
     if (project.hasProperty("modmenu_version")) {
-        // TODO: babric2ornithe - verify this dependency is available for ornithe
-        // modImplementation("net.danygames2014:modmenu:${project.modmenu_version}") {
-        // transitive = false
-        // }
+        modImplementation("net.danygames2014:modmenu:${project.modmenu_version}") {
+            transitive = false
+        }
     }
 
     if (project.hasProperty("glass_networking_version")) {
-        // TODO: babric2ornithe - verify this dependency is available for ornithe
-        // modImplementation("net.glasslauncher.mods:glass-networking:${project.glass_networking_version}") {
-        // transitive = false
-        // }
+        modImplementation("net.glasslauncher.mods:glass-networking:${project.glass_networking_version}") {
+            transitive = false
+        }
     }
 
     if (project.hasProperty("gcapi_version")) {
         modImplementation("net.glasslauncher.mods:GlassConfigAPI:${project.gcapi_version}") {
-        	transitive = false
+            transitive = false
         }
     }
 
     if (project.hasProperty("alwaysmoreitems_version")) {
-        // TODO: babric2ornithe - verify this dependency is available for ornithe
-        // modImplementation("net.glasslauncher.mods:AlwaysMoreItems:${project.alwaysmoreitems_version}") {
-        // transitive = false
-        // }
+        modImplementation("net.glasslauncher.mods:AlwaysMoreItems:${project.alwaysmoreitems_version}") {
+            transitive = false
+        }
     }
 
     if (project.hasProperty("retrocommands_version")) {
-        modImplementation("com.periut:retrocommands:${project.retrocommands_version}") {
-        	transitive = false
+        modImplementation("maven.modrinth:retrocommands:${project.retrocommands_version}-b1.7.3") {
+            transitive = false
         }
     }
 
     if (project.hasProperty("spawneggs_version")) {
-        // TODO: babric2ornithe - verify this dependency is available for ornithe
-        // modImplementation("net.danygames2014:spawneggs:${project.spawneggs_version}") {
-        // transitive = false
-        // }
+        modImplementation("net.danygames2014:spawneggs:${project.spawneggs_version}") {
+            transitive = false
+        }
     }
 
     if (project.hasProperty("bhcreative_version")) {
-        modImplementation("paulevs.bhcreative:BHCreative:${project.bhcreative_version}") {
-        	transitive = false
+        modImplementation("maven.modrinth:bh-creative:${project.bhcreative_version}-b1.7.3") {
+            transitive = false
         }
     }
 
     if (project.hasProperty("accessoryapi_version")) {
-        modImplementation("com.periut:accessory-api:${project.accessory_version}") {
-        	transitive = false
+        modImplementation("maven.modrinth:accessory-api:${project.accessoryapi_version}") {
+            transitive = false
         }
     }
 
     if (project.hasProperty("whatsthis_version")) {
-        // TODO: babric2ornithe - verify this dependency is available for ornithe
-        // modImplementation("net.danygames2014:WhatsThis:${project.whatsthis_version}") {
-        // transitive = false
-        // }
+        modImplementation("net.danygames2014:WhatsThis:${project.whatsthis_version}") {
+            transitive = false
+        }
     }
 
     if (project.hasProperty("nyalib_version")) {
-        // TODO: babric2ornithe - verify this dependency is available for ornithe
-        // modImplementation("net.danygames2014:NyaLib:${project.nyalib_version}")
+        modImplementation("net.danygames2014:NyaLib:${project.nyalib_version}")
     }
 
     if (project.hasProperty("uniwrench_version")) {
-        // TODO: babric2ornithe - verify this dependency is available for ornithe
-        // modImplementation("net.danygames2014:UniWrench:${project.uniwrench_version}") {
-        // transitive = false
-        // }
+        modImplementation("net.danygames2014:UniWrench:${project.uniwrench_version}") {
+            transitive = false
+        }
     }
 
     if (project.hasProperty("debugutilities_version")) {
-        // TODO: babric2ornithe - verify this dependency is available for ornithe
-        // modImplementation("net.danygames2014:DebugUtilities:${project.debugutilities_version}")
+        modImplementation("net.danygames2014:DebugUtilities:${project.debugutilities_version}")
     }
 
     if (project.hasProperty("retroauth_version")) {
-        // TODO: babric2ornithe - verify this dependency is available for ornithe
-        // modRuntimeOnly("maven.modrinth:retroauth:${project.retroauth_version}-b1.7.3") {
-        // transitive = false
-        // }
+        modRuntimeOnly("maven.modrinth:retroauth:${project.retroauth_version}-b1.7.3") {
+            transitive = false
+        }
     }
 
     if (project.hasProperty("unitweaks_version")) {
-        // TODO: babric2ornithe - verify this dependency is available for ornithe
-        // modRuntimeOnly("maven.modrinth:unitweaks:${project.unitweaks_version}-b1.7.3") {
-        // transitive = false
-        // }
+        modRuntimeOnly("maven.modrinth:unitweaks:${project.unitweaks_version}-b1.7.3") {
+            transitive = false
+        }
     }
 
-    // TODO: babric2ornithe - verify this dependency is available for ornithe
-    // modRuntimeOnly("maven.modrinth:fast-stapi-intro:2.0.0-b1.7.3") {
-    // transitive = false
-    // }
+    modRuntimeOnly("maven.modrinth:fast-stapi-intro:2.0.0-b1.7.3") {
+        transitive = false
+    }
 
-    modImplementation "com.periut:starac:${project.starac_version}"
-}
-// Exclude Legacy Fabric LWJGL 2 wrapper (starac provides LWJGL 3)
-configurations.configureEach {
-	exclude group: 'org.lwjgl.lwjgl'
-}
+    modRuntimeOnly("maven.modrinth:apron:2.0.0-b1.7.3") {
 
+    }
+}
 
 processResources {
     inputs.property "version", project.version
@@ -218,7 +192,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 21
+    it.options.release = 17
 }
 
 // Disables the generation of the .module file

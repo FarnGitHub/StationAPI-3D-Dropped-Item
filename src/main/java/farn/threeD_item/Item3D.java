@@ -3,11 +3,11 @@ package farn.threeD_item;
 import farn.threeD_item.mixin.BakedModelAccessor;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
-import net.minecraft.block.TorchBlock;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.modificationstation.stationapi.api.client.render.model.BakedModel;
 import net.modificationstation.stationapi.api.client.render.model.BakedQuad;
@@ -20,29 +20,32 @@ import net.modificationstation.stationapi.impl.client.arsenic.renderer.render.Ar
 import net.modificationstation.stationapi.impl.client.arsenic.renderer.render.BakedModelRendererImpl;
 import net.modificationstation.stationapi.mixin.arsenic.client.EntityRendererAccessor;
 import net.modificationstation.stationapi.mixin.arsenic.client.ItemRendererAccessor;
-import org.lwjgl.opengl.GL11;
 
-import static org.lwjgl.opengl.GL11.glPopMatrix;
-import static org.lwjgl.opengl.GL11.glPushMatrix;
-import static org.lwjgl.opengl.GL11.glRotatef;
-import static org.lwjgl.opengl.GL11.glScalef;
-import static org.lwjgl.opengl.GL11.glTranslatef;
+import static org.lwjgl.opengl.GL11.*;
 
 public class Item3D {
 
-    static ArsenicItemRenderer renderer;
-    static ItemRenderer itemRenderer;
-    static ItemRendererAccessor itemRendererAccessor;
-    static EntityRendererAccessor entityRendererAccessor;
-    public static boolean renderDroppedItem = false;
+    static ArsenicItemRenderer arsenicRender;
+    static ItemRenderer vanillaRender;
+    static ItemRendererAccessor vanillaRenderA;
+    static EntityRendererAccessor entityRenderA;
     public static boolean rotateJsonItem = true;
     public static boolean gcapiEnabled = FabricLoader.getInstance().isModLoaded("gcapi3");
 
-    public static void render3DVanilla(ItemEntity item, float x, float y, float z, float delta, ItemStack stack, float yOffset, float rotateOffset, byte renderedAmount, SpriteAtlasTexture atlas) {
+    public static void render3DVanilla(
+            ItemEntity item,
+            float x, float y, float z,
+            float delta,
+            ItemStack stack,
+            float yOffset,
+            float rotateOffset,
+            byte renderedAmount,
+            SpriteAtlasTexture atlas
+    ) {
         glPushMatrix();
         glTranslatef(x, y + yOffset, z);
         Block block;
-        if (stack.getItem() instanceof BlockItemForm blockItemForm && BlockRenderManager.isSideLit((block = blockItemForm.getBlock()).getRenderType()) && !(blockItemForm.getBlock() instanceof TorchBlock)) {
+        if (stack.getItem() instanceof BlockItemForm blockItemForm && BlockRenderManager.isSideLit((block = blockItemForm.getBlock()).getRenderType())) {
             glRotatef(rotateOffset, 0.0F, 1.0F, 0.0F);
             atlas.bindTexture();
             float renderScale = 0.25F;
@@ -51,13 +54,13 @@ public class Item3D {
             for (int loopIndex = 0; loopIndex < renderedAmount; ++loopIndex) {
                 glPushMatrix();
                 if (loopIndex > 0) {
-                    float spinX = (itemRendererAccessor.getRandom().nextFloat() * 2.0F - 1.0F) * 0.2F / renderScale;
-                    float spinY = (itemRendererAccessor.getRandom().nextFloat() * 2.0F - 1.0F) * 0.2F / renderScale;
-                    float spinZ = (itemRendererAccessor.getRandom().nextFloat() * 2.0F - 1.0F) * 0.2F / renderScale;
+                    float spinX = (vanillaRenderA.getRandom().nextFloat() * 2.0F - 1.0F) * 0.2F / renderScale;
+                    float spinY = (vanillaRenderA.getRandom().nextFloat() * 2.0F - 1.0F) * 0.2F / renderScale;
+                    float spinZ = (vanillaRenderA.getRandom().nextFloat() * 2.0F - 1.0F) * 0.2F / renderScale;
                     glTranslatef(spinX, spinY, spinZ);
                 }
 
-                itemRendererAccessor.getBlockRenderer().render(block, stack.getDamage(), item.getBrightnessAtEyes(delta));
+                vanillaRenderA.getBlockRenderer().render(block, stack.getDamage(), item.getBrightnessAtEyes(delta));
                 glPopMatrix();
             }
         } else {
@@ -79,25 +82,38 @@ public class Item3D {
             } else {
                 mergeType = 4;
             }
+
+            if (vanillaRender.useCustomDisplayColor) {
+                int rgb = Item.ITEMS[stack.itemId].getColorMultiplier(stack.getDamage());
+                float r = (float) ((rgb >> 16) & 255) / 255.0F;
+                float g = (float) ((rgb >> 8) & 255) / 255.0F;
+                float b = (float) (rgb & 255) / 255.0F;
+                float brightness = item.getBrightnessAtEyes(delta);
+                glColor4f(r * brightness, g * brightness, b * brightness, 1.0F);
+            }
+
             Tessellator tessellator = Tessellator.INSTANCE;
             glPushMatrix();
-            GL11.glScalef(0.5F, 0.5F, 0.5F);
+            glScalef(0.5F, 0.5F, 0.5F);
             glRotatef((((float)item.age + delta) / 20.0F + item.initialRotationAngle) * (180.0F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
             glTranslatef(-0.5F, -0.25F, -((smallNudge + bigNudge) * (float) mergeType / 2.0F));
+            atlas.bindTexture();
             for(int loopIndex = 0; loopIndex < mergeType; ++loopIndex) {
-                GL11.glTranslatef(0.0F, 0.0F, smallNudge + bigNudge);
-                atlas.bindTexture();
-                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+                glTranslatef(0.0F, 0.0F, smallNudge + bigNudge);
                 renderItemModel(tessellator, maxU, minV, minU, maxV, atlas.getWidth(), atlas.getHeight(), smallNudge);
             }
 
-            GL11.glPopMatrix();
+            glPopMatrix();
         }
-        GL11.glPopMatrix();
+        glPopMatrix();
     }
 
-    public static void unflatedBakedModelRenderer(BakedModel model, ItemStack stack, float brightness, BakedModelRendererImpl impl) {
-        BakedModelAccessor accessor = (BakedModelAccessor)impl;
+    public static void render3DGroundModel(
+            BakedModel model,
+            ItemStack stack,
+            float brightness,
+            BakedModelRendererImpl render) {
+        BakedModelAccessor accessor = (BakedModelAccessor)render;
         accessor.m3d_getRandom().setSeed(42L);
         boolean bl = stack != null && stack.itemId != 0 && stack.count > 0;
         for (BakedQuad bakedQuad : model.getQuads(null, null, accessor.m3d_getRandom())) {
@@ -109,88 +125,102 @@ public class Item3D {
         }
     }
 
-    public static void renderItemModel(Tessellator var0, float var1, float var2, float var3, float var4, int var5, int var6, float var7) {
-        var0.startQuads();
-        var0.normal(0.0F, 0.0F, 1.0F);
-        var0.vertex(0.0D, 0.0D, 0.0D, (double)var1, (double)var4);
-        var0.vertex(1.0D, 0.0D, 0.0D, (double)var3, (double)var4);
-        var0.vertex(1.0D, 1.0D, 0.0D, (double)var3, (double)var2);
-        var0.vertex(0.0D, 1.0D, 0.0D, (double)var1, (double)var2);
-        var0.draw();
-        var0.startQuads();
-        var0.normal(0.0F, 0.0F, -1.0F);
-        var0.vertex(0.0D, 1.0D, (double)(0.0F - var7), (double)var1, (double)var2);
-        var0.vertex(1.0D, 1.0D, (double)(0.0F - var7), (double)var3, (double)var2);
-        var0.vertex(1.0D, 0.0D, (double)(0.0F - var7), (double)var3, (double)var4);
-        var0.vertex(0.0D, 0.0D, (double)(0.0F - var7), (double)var1, (double)var4);
-        var0.draw();
-        float var8 = (float)var5 * (var1 - var3);
-        float var9 = (float)var6 * (var4 - var2);
-        var0.startQuads();
-        var0.normal(-1.0F, 0.0F, 0.0F);
+    public static void renderItemModel(
+            Tessellator tess,
+            float maxU,
+            float minV,
+            float minU,
+            float maxV,
+            int width,
+            int height,
+            float bleed
+    ) {
+        tess.startQuads();
+        tess.normal(0.0F, 0.0F, 1.0F);
+        tess.vertex(0.0D, 0.0D, 0.0D, maxU, maxV);
+        tess.vertex(1.0D, 0.0D, 0.0D, minU, maxV);
+        tess.vertex(1.0D, 1.0D, 0.0D, minU, minV);
+        tess.vertex(0.0D, 1.0D, 0.0D, maxU, minV);
+        tess.draw();
+        tess.startQuads();
+        tess.normal(0.0F, 0.0F, -1.0F);
+        tess.vertex(0.0D, 1.0D, (0.0F - bleed), maxU, minV);
+        tess.vertex(1.0D, 1.0D, (0.0F - bleed), minU, minV);
+        tess.vertex(1.0D, 0.0D, (0.0F - bleed), minU, maxV);
+        tess.vertex(0.0D, 0.0D, (0.0F - bleed), maxU, maxV);
+        tess.draw();
+        float var8 = (float)width * (maxU - minU);
+        float var9 = (float)height * (maxV - minV);
+        tess.startQuads();
+        tess.normal(-1.0F, 0.0F, 0.0F);
 
         int var10;
         float var11;
         float var12;
         for(var10 = 0; (float)var10 < var8; ++var10) {
             var11 = (float)var10 / var8;
-            var12 = var1 + (var3 - var1) * var11 - 0.5F / (float)var5;
-            var0.vertex((double)var11, 0.0D, (double)(0.0F - var7), (double)var12, (double)var4);
-            var0.vertex((double)var11, 0.0D, 0.0D, (double)var12, (double)var4);
-            var0.vertex((double)var11, 1.0D, 0.0D, (double)var12, (double)var2);
-            var0.vertex((double)var11, 1.0D, (double)(0.0F - var7), (double)var12, (double)var2);
+            var12 = maxU + (minU - maxU) * var11 - 0.5F / (float)width;
+            tess.vertex(var11, 0.0D, (0.0F - bleed), var12, maxV);
+            tess.vertex(var11, 0.0D, 0.0D, var12, maxV);
+            tess.vertex(var11, 1.0D, 0.0D, var12, minV);
+            tess.vertex(var11, 1.0D, (0.0F - bleed), var12, minV);
         }
 
-        var0.draw();
-        var0.startQuads();
-        var0.normal(1.0F, 0.0F, 0.0F);
+        tess.draw();
+        tess.startQuads();
+        tess.normal(1.0F, 0.0F, 0.0F);
 
         float var13;
         for(var10 = 0; (float)var10 < var8; ++var10) {
             var11 = (float)var10 / var8;
-            var12 = var1 + (var3 - var1) * var11 - 0.5F / (float)var5;
+            var12 = maxU + (minU - maxU) * var11 - 0.5F / (float)width;
             var13 = var11 + 1.0F / var8;
-            var0.vertex((double)var13, 1.0D, (double)(0.0F - var7), (double)var12, (double)var2);
-            var0.vertex((double)var13, 1.0D, 0.0D, (double)var12, (double)var2);
-            var0.vertex((double)var13, 0.0D, 0.0D, (double)var12, (double)var4);
-            var0.vertex((double)var13, 0.0D, (double)(0.0F - var7), (double)var12, (double)var4);
+            tess.vertex(var13, 1.0D, (0.0F - bleed), var12, minV);
+            tess.vertex(var13, 1.0D, 0.0D, var12, minV);
+            tess.vertex(var13, 0.0D, 0.0D, var12, maxV);
+            tess.vertex(var13, 0.0D, (0.0F - bleed), var12, maxV);
         }
 
-        var0.draw();
-        var0.startQuads();
-        var0.normal(0.0F, 1.0F, 0.0F);
+        tess.draw();
+        tess.startQuads();
+        tess.normal(0.0F, 1.0F, 0.0F);
 
         for(var10 = 0; (float)var10 < var9; ++var10) {
             var11 = (float)var10 / var9;
-            var12 = var4 + (var2 - var4) * var11 - 0.5F / (float)var6;
+            var12 = maxV + (minV - maxV) * var11 - 0.5F / (float)height;
             var13 = var11 + 1.0F / var9;
-            var0.vertex(0.0D, (double)var13, 0.0D, (double)var1, (double)var12);
-            var0.vertex(1.0D, (double)var13, 0.0D, (double)var3, (double)var12);
-            var0.vertex(1.0D, (double)var13, (double)(0.0F - var7), (double)var3, (double)var12);
-            var0.vertex(0.0D, (double)var13, (double)(0.0F - var7), (double)var1, (double)var12);
+            tess.vertex(0.0D, var13, 0.0D, maxU, var12);
+            tess.vertex(1.0D, var13, 0.0D, minU, var12);
+            tess.vertex(1.0D, var13, (0.0F - bleed), minU, var12);
+            tess.vertex(0.0D, var13, (0.0F - bleed), maxU, var12);
         }
 
-        var0.draw();
-        var0.startQuads();
-        var0.normal(0.0F, -1.0F, 0.0F);
+        tess.draw();
+        tess.startQuads();
+        tess.normal(0.0F, -1.0F, 0.0F);
 
         for(var10 = 0; (float)var10 < var9; ++var10) {
             var11 = (float)var10 / var9;
-            var12 = var4 + (var2 - var4) * var11 - 0.5F / (float)var6;
-            var0.vertex(1.0D, (double)var11, 0.0D, (double)var3, (double)var12);
-            var0.vertex(0.0D, (double)var11, 0.0D, (double)var1, (double)var12);
-            var0.vertex(0.0D, (double)var11, (double)(0.0F - var7), (double)var1, (double)var12);
-            var0.vertex(1.0D, (double)var11, (double)(0.0F - var7), (double)var3, (double)var12);
+            var12 = maxV + (minV - maxV) * var11 - 0.5F / (float)height;
+            tess.vertex(1.0D, var11, 0.0D, minU, var12);
+            tess.vertex(0.0D, var11, 0.0D, maxU, var12);
+            tess.vertex(0.0D, var11, (0.0F - bleed), maxU, var12);
+            tess.vertex(1.0D, var11, (0.0F - bleed), minU, var12);
         }
 
-        var0.draw();
+        tess.draw();
     }
 
-    public static void setVariableItemRenderer(ArsenicItemRenderer rendererRaw, ItemRenderer itemRendererRaw, ItemRendererAccessor itemRendererAccessorRaw, EntityRendererAccessor entityRendererAccessorRaw) {
-        renderer = rendererRaw;
-        itemRenderer = itemRendererRaw;
-        itemRendererAccessor = itemRendererAccessorRaw;
-        entityRendererAccessor = entityRendererAccessorRaw;
+    public static void setVariable(
+            ArsenicItemRenderer rendererRaw,
+            ItemRenderer itemRendererRaw,
+            ItemRendererAccessor itemRendererAccessorRaw,
+            EntityRendererAccessor entityRendererAccessorRaw
+    ) {
+        arsenicRender = rendererRaw;
+        vanillaRender = itemRendererRaw;
+        vanillaRenderA = itemRendererAccessorRaw;
+        entityRenderA = entityRendererAccessorRaw;
     }
 
     public static boolean isEnabled() {

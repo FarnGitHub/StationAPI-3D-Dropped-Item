@@ -3,9 +3,7 @@ package farn.threeD_item.mixin;
 import net.minecraft.client.render.Tessellator;
 import net.modificationstation.stationapi.api.client.color.item.ItemColors;
 import net.modificationstation.stationapi.impl.client.arsenic.renderer.render.BakedModelRendererImpl;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
