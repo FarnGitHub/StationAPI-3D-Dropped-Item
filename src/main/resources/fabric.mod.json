@@ -14,12 +14,12 @@
     "3dItem.mixins.json"
   ],
   "entrypoints": {
-    "gcapi3": [
-      "farn.threeD_item.GCAPI_Handler"
+    "modmenu": [
+      "farn.threeD_item.config.ModMenuListener"
     ]
   },
+  "accessWidener": "3dItem.classTweaker",
   "depends": {
-    "minecraft": "1.0.0-beta.7.3",
-    "stationapi": "*"
+    "minecraft": "1.0.0-beta.7.3"
   }
 }

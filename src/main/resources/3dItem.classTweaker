@@ -1,0 +1,5 @@
+classTweaker v1 named
+
+accessible field net/minecraft/client/render/item/ItemRenderer random Ljava/util/Random;
+accessible field net/minecraft/client/render/item/ItemRenderer blockRenderer Lnet/minecraft/client/render/block/BlockRenderManager;
+accessible method net/minecraft/client/render/entity/EntityRenderer bindTexture (Ljava/lang/String;)V

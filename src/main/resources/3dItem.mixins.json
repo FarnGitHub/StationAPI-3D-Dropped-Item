@@ -1,13 +1,15 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "farn.threeD_item.mixin",
+  "package": "farn.threeD_item.mixin.impl",
   "compatibilityLevel": "JAVA_17",
   "client": [
     "ArsenicItemRendererMixin",
     "BakedModelRendererMixin",
-    "BakedModelAccessor"
+    "VanillaItemRendererMixin"
   ],
+  "plugin": "farn.threeD_item.mixin.MixinPlugin",
+  "mixinextras": {"minVersion": "0.5.4"},
   "injectors": {
     "defaultRequire": 1
   }

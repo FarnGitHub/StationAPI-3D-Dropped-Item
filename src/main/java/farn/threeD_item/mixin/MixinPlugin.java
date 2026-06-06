@@ -1,4 +1,5 @@
-package farn.mcpatcher_custom_texture;
+package farn.threeD_item.mixin;
+
 
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
@@ -8,7 +9,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import java.util.List;
 import java.util.Set;
 
-public class ModernTooltipMixinPlugin implements IMixinConfigPlugin {
+public class MixinPlugin implements IMixinConfigPlugin {
     @Override
     public void onLoad(String mixinPackage) {
 
@@ -21,10 +22,8 @@ public class ModernTooltipMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if(mixinClassName.equals("AMIToolTipMixin")) {
-            return FabricLoader.getInstance().isModLoaded("alwaysmoreitems");
-        } else if(mixinClassName.equals("paulevs.bhcreative.mixin.client.PlayerScreenMixin")) {
-            return false;
+        if(mixinClassName.equals("farn.threeD_item.mixin.impl.VanillaItemRendererMixin")) {
+            return !FabricLoader.getInstance().isModLoaded("stationapi");
         }
         return true;
     }
