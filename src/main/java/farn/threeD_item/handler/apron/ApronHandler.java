@@ -8,7 +8,7 @@ import net.minecraft.item.ItemStack;
 
 public class ApronHandler {
 
-    public static boolean shouldNotRenderCustomBlock(ItemStack itemStack, BlockRenderManager render, int meta, float brightness) {
+    public static boolean skipVanillaBlockRender(ItemStack itemStack, BlockRenderManager render, int meta, float brightness) {
         ICustomItemRenderer customRenderer = MinecraftForgeClient.getCustomItemRenderer(itemStack.itemId);
         if (customRenderer != null) {
             ForgeHooksClient.renderCustomItem(customRenderer, render, itemStack.itemId, meta, brightness);

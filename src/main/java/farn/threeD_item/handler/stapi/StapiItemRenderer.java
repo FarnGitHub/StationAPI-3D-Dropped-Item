@@ -52,7 +52,7 @@ public class StapiItemRenderer {
                     glTranslatef(spinX, spinY, spinZ);
                 }
 
-                if(!ValueHolder.hasApron || ApronHandler.shouldNotRenderCustomBlock(stack, itemRenderer.blockRenderer, stack.getDamage(), item.getBrightnessAtEyes(delta)))
+                if(!ValueHolder.hasApron || ApronHandler.skipVanillaBlockRender(stack, itemRenderer.blockRenderer, stack.getDamage(), item.getBrightnessAtEyes(delta)))
                     itemRenderer.blockRenderer.render(block, stack.getDamage(), item.getBrightnessAtEyes(delta));
                 glPopMatrix();
             }

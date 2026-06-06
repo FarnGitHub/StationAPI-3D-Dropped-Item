@@ -63,7 +63,7 @@ public class VanillaItemRenderer {
                     }
 
                     float brightness = ent.getBrightnessAtEyes(1.0F);
-                    if(!ValueHolder.hasApron || ApronHandler.shouldNotRenderCustomBlock(stack, renderer.blockRenderer, stack.getDamage(), brightness))
+                    if(!ValueHolder.hasApron || ApronHandler.skipVanillaBlockRender(stack, renderer.blockRenderer, stack.getDamage(), brightness))
                         renderer.blockRenderer.render(block, stack.getDamage(), brightness);
                     GL11.glPopMatrix();
                 }
