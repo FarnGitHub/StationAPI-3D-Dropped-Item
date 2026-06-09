@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import farn.threeD_item.main.ValueHolder;
+import farn.threeD_item.Dropped3DItem;
 import net.modificationstation.stationapi.api.client.render.model.json.ModelTransformation;
 import net.modificationstation.stationapi.impl.client.arsenic.renderer.render.BakedModelRendererImpl;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,6 +21,6 @@ public abstract class BakedModelRendererMixin {
     @Expression("renderMode == GROUND")
     @WrapOperation(method="renderItem(Lnet/minecraft/item/ItemStack;Lnet/modificationstation/stationapi/api/client/render/model/json/ModelTransformation$Mode;FLnet/modificationstation/stationapi/api/client/render/model/BakedModel;)V", at = @At("MIXINEXTRAS:EXPRESSION"))
     public boolean item3d_ForceRenderAs3D(Object left, Object right, Operation<Boolean> original) {
-        return !ValueHolder.renderDroppedItem && original.call(left, right);
+        return !Dropped3DItem.renderDroppedItem && original.call(left, right);
     }
 }

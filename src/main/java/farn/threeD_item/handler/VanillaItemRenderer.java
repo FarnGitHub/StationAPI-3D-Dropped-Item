@@ -1,6 +1,6 @@
 package farn.threeD_item.handler;
 
-import farn.threeD_item.main.ValueHolder;
+import farn.threeD_item.Dropped3DItem;
 import farn.threeD_item.handler.apron.ApronHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.render.Tessellator;
@@ -37,13 +37,13 @@ public class VanillaItemRenderer {
             GL11.glTranslatef((float)x, (float)y + yOffset, (float)z);
             GL11.glEnable(GL12.GL_RESCALE_NORMAL);
             Block block = null;
-            if(stack.itemId < 256) {
+            if(stack.itemId < 256)
                 block = Block.BLOCKS[stack.itemId];
-            }
+
             if(block != null && BlockRenderManager.isSideLit(block.getRenderType())) {
                 GL11.glRotatef(rotation, 0.0F, 1.0F, 0.0F);
                 renderer.bindTexture("/terrain.png");
-                if(ValueHolder.hasApron)
+                if(Dropped3DItem.apron)
                     ApronHandler.bindTexture(block);
                 float size = 0.25F;
                 int render = block.getRenderType();
@@ -63,7 +63,7 @@ public class VanillaItemRenderer {
                     }
 
                     float brightness = ent.getBrightnessAtEyes(1.0F);
-                    if(!ValueHolder.hasApron || ApronHandler.skipVanillaBlockRender(stack, renderer.blockRenderer, stack.getDamage(), brightness))
+                    if(!Dropped3DItem.apron || ApronHandler.skipVanillaBlockRender(stack, renderer.blockRenderer, stack.getDamage(), brightness))
                         renderer.blockRenderer.render(block, stack.getDamage(), brightness);
                     GL11.glPopMatrix();
                 }
@@ -77,9 +77,9 @@ public class VanillaItemRenderer {
                     float g = (float)(color >> 8 & 255) / 255.0F;
                     float b = (float)(color & 255) / 255.0F;
                     float brightness = ent.getBrightnessAtEyes(1.0F);
-                    renderDroppedItem(renderer, ent, textureId, mergeType, block, r * brightness, g * brightness, b * brightness, rotation);
+                    renderDroppedItem(renderer, stack, textureId, mergeType, block, r * brightness, g * brightness, b * brightness, rotation);
                 } else {
-                    renderDroppedItem(renderer, ent, textureId, mergeType, block, 1.0F, 1.0F, 1.0F, rotation);
+                    renderDroppedItem(renderer, stack, textureId, mergeType, block, 1.0F, 1.0F, 1.0F, rotation);
                 }
             }
 
@@ -88,7 +88,7 @@ public class VanillaItemRenderer {
         }
     }
 
-    private static void renderDroppedItem(ItemRenderer renderer, ItemEntity ent, int texture, int mergeType, Block block, float r, float g, float b, float rotation) {
+    private static void renderDroppedItem(ItemRenderer renderer, ItemStack stack, int texture, int mergeType, Block block, float r, float g, float b, float rotation) {
         Tessellator tess = Tessellator.INSTANCE;
         float minU = (float)(texture % 16 * 16) / 256.0F;
         float maxU = (float)(texture % 16 * 16 + 16) / 256.0F;
@@ -96,101 +96,102 @@ public class VanillaItemRenderer {
         float maxV = (float)(texture / 16 * 16 + 16) / 256.0F;
         GL11.glPushMatrix();
         GL11.glRotatef(rotation, 0.0F, 1.0F, 0.0F);
-        ItemStack stack = ent.stack;
         GL11.glTranslatef(-0.5F, -0.25F, -(0.084375F * (float)mergeType / 2.0F));
         for(int loop = 0; loop < mergeType; ++loop) {
             GL11.glTranslatef(0.0F, 0.0F, 0.084375F);
-            if(block != null) {
-                renderer.bindTexture("/terrain.png");
-                if(ValueHolder.hasApron)
-                    ApronHandler.bindTexture(block);
-            } else {
-                renderer.bindTexture("/gui/items.png");
-                if(ValueHolder.hasApron)
-                    ApronHandler.bindTexture(Item.ITEMS[stack.itemId]);
-            }
+            renderer.bindTexture(
+                    block != null ? "/terrain.png" : "/gui/items.png"
+            );
+            if(Dropped3DItem.apron)
+                ApronHandler.bindTexture(
+                        block != null ? block : Item.ITEMS[stack.itemId]
+                );
 
             GL11.glColor4f(r, g, b, 1.0F);
-            draw3DItemQuad(tess, maxU, minV, minU, maxV,0.0625F);
+            render3DItem(tess, maxU, minV, minU, maxV, 256, 256,0.0625F);
         }
 
         GL11.glPopMatrix();
 
     }
 
-    public static void draw3DItemQuad(Tessellator tess, float maxU, float minV, float minU, float maxV, float bleed) {
-        float f6 = 1.0F;
+    public static void render3DItem(
+            Tessellator tess,
+            float maxU,
+            float minV,
+            float minU,
+            float maxV,
+            int atlasWidth,
+            int atlasHeight,
+            float bleed
+    ) {
         tess.startQuads();
         tess.normal(0.0F, 0.0F, 1.0F);
         tess.vertex(0.0D, 0.0D, 0.0D, maxU, maxV);
-        tess.vertex(f6, 0.0D, 0.0D, minU, maxV);
-        tess.vertex(f6, 1.0D, 0.0D, minU, minV);
+        tess.vertex(1.0D, 0.0D, 0.0D, minU, maxV);
+        tess.vertex(1.0D, 1.0D, 0.0D, minU, minV);
         tess.vertex(0.0D, 1.0D, 0.0D, maxU, minV);
         tess.draw();
         tess.startQuads();
         tess.normal(0.0F, 0.0F, -1.0F);
-        tess.vertex(0.0D, 1.0D, 0.0F - bleed, maxU, minV);
-        tess.vertex(f6, 1.0D, 0.0F - bleed, minU, minV);
-        tess.vertex(f6, 0.0D, 0.0F - bleed, minU, maxV);
-        tess.vertex(0.0D, 0.0D, 0.0F - bleed, maxU, maxV);
+        tess.vertex(0.0D, 1.0D, (0.0F - bleed), maxU, minV);
+        tess.vertex(1.0D, 1.0D, (0.0F - bleed), minU, minV);
+        tess.vertex(1.0D, 0.0D, (0.0F - bleed), minU, maxV);
+        tess.vertex(0.0D, 0.0D, (0.0F - bleed), maxU, maxV);
         tess.draw();
+        float width = (float)atlasWidth * (maxU - minU);
+        float height = (float)atlasHeight * (maxV - minV);
         tess.startQuads();
         tess.normal(-1.0F, 0.0F, 0.0F);
 
-        int i7;
-        float f8;
-        float f9;
-        float f10;
-        for(i7 = 0; i7 < 16; ++i7) {
-            f8 = (float)i7 / 16.0F;
-            f9 = maxU + (minU - maxU) * f8 - 0.001953125F;
-            f10 = f6 * f8;
-            tess.vertex(f10, 0.0D, 0.0F - bleed, f9, maxV);
-            tess.vertex(f10, 0.0D, 0.0D, f9, maxV);
-            tess.vertex(f10, 1.0D, 0.0D, f9, minV);
-            tess.vertex(f10, 1.0D, 0.0F - bleed, f9, minV);
+        for(int column = 0; (float)column < width; ++column) {
+            float normal = (float)column / width;
+            float interpolate = maxU + (minU - maxU) * normal - 0.5F / (float)atlasWidth;
+            tess.vertex(normal, 0.0D, (0.0F - bleed), interpolate, maxV);
+            tess.vertex(normal, 0.0D, 0.0D, interpolate, maxV);
+            tess.vertex(normal, 1.0D, 0.0D, interpolate, minV);
+            tess.vertex(normal, 1.0D, (0.0F - bleed), interpolate, minV);
         }
 
         tess.draw();
         tess.startQuads();
         tess.normal(1.0F, 0.0F, 0.0F);
 
-        for(i7 = 0; i7 < 16; ++i7) {
-            f8 = (float)i7 / 16.0F;
-            f9 = maxU + (minU - maxU) * f8 - 0.001953125F;
-            f10 = f6 * f8 + 0.0625F;
-            tess.vertex(f10, 1.0D, 0.0F - bleed, f9, minV);
-            tess.vertex(f10, 1.0D, 0.0D, f9, minV);
-            tess.vertex(f10, 0.0D, 0.0D, f9, maxV);
-            tess.vertex(f10, 0.0D, 0.0F - bleed, f9, maxV);
+        for(int column = 0; (float)column < width; ++column) {
+            float normal = (float)column / width;
+            float interpolate = maxU + (minU - maxU) * normal - 0.5F / (float)atlasWidth;
+            float normal2 = normal + 1.0F / width;
+            tess.vertex(normal2, 1.0D, (0.0F - bleed), interpolate, minV);
+            tess.vertex(normal2, 1.0D, 0.0D, interpolate, minV);
+            tess.vertex(normal2, 0.0D, 0.0D, interpolate, maxV);
+            tess.vertex(normal2, 0.0D, (0.0F - bleed), interpolate, maxV);
         }
 
         tess.draw();
         tess.startQuads();
         tess.normal(0.0F, 1.0F, 0.0F);
 
-        for(i7 = 0; i7 < 16; ++i7) {
-            f8 = (float)i7 / 16.0F;
-            f9 = maxV + (minV - maxV) * f8 - 0.001953125F;
-            f10 = f6 * f8 + 0.0625F;
-            tess.vertex(0.0D, f10, 0.0D, maxU, f9);
-            tess.vertex(f6, f10, 0.0D, minU, f9);
-            tess.vertex(f6, f10, 0.0F - bleed, minU, f9);
-            tess.vertex(0.0D, f10, 0.0F - bleed, maxU, f9);
+        for(int column = 0; (float)column < height; ++column) {
+            float normal = (float)column / height;
+            float interpolate = maxV + (minV - maxV) * normal - 0.5F / (float)atlasHeight;
+            float normal2 = normal + 1.0F / height;
+            tess.vertex(0.0D, normal2, 0.0D, maxU, interpolate);
+            tess.vertex(1.0D, normal2, 0.0D, minU, interpolate);
+            tess.vertex(1.0D, normal2, (0.0F - bleed), minU, interpolate);
+            tess.vertex(0.0D, normal2, (0.0F - bleed), maxU, interpolate);
         }
 
         tess.draw();
         tess.startQuads();
         tess.normal(0.0F, -1.0F, 0.0F);
 
-        for(i7 = 0; i7 < 16; ++i7) {
-            f8 = (float)i7 / 16.0F;
-            f9 = maxV + (minV - maxV) * f8 - 0.001953125F;
-            f10 = f6 * f8;
-            tess.vertex(f6, f10, 0.0D, minU, f9);
-            tess.vertex(0.0D, f10, 0.0D, maxU, f9);
-            tess.vertex(0.0D, f10, 0.0F - bleed, maxU, f9);
-            tess.vertex(f6, f10, 0.0F - bleed, minU, f9);
+        for(int column = 0; (float)column < height; ++column) {
+            float normal = (float)column / height;
+            float interpolate = maxV + (minV - maxV) * normal - 0.5F / (float)atlasHeight;
+            tess.vertex(1.0D, normal, 0.0D, minU, interpolate);
+            tess.vertex(0.0D, normal, 0.0D, maxU, interpolate);
+            tess.vertex(0.0D, normal, (0.0F - bleed), maxU, interpolate);
+            tess.vertex(1.0D, normal, (0.0F - bleed), minU, interpolate);
         }
 
         tess.draw();

@@ -1,6 +1,6 @@
 package farn.threeD_item.config;
 
-import farn.threeD_item.main.ValueHolder;
+import farn.threeD_item.Dropped3DItem;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.TranslationStorage;
@@ -43,9 +43,9 @@ public class ConfigScreen extends Screen {
 
     public void buttonClicked(ButtonWidget button) {
         if(button.id == 0) {
-            ValueHolder.enabled = !ValueHolder.enabled;
+            Dropped3DItem.enabled = !Dropped3DItem.enabled;
             button.text = enabledString();
-            ValueHolder.saveConfig();
+            Dropped3DItem.saveConfig();
         } else {
             this.minecraft.setScreen(this.parent);
         }
@@ -53,6 +53,6 @@ public class ConfigScreen extends Screen {
     }
 
     private String enabledString() {
-        return "Enabled: " + ValueHolder.enabled;
+        return "Enabled: " + Dropped3DItem.enabled;
     }
 }
