@@ -1,7 +1,7 @@
 plugins {
     id 'maven-publish'
-    id 'fabric-loom' version '1.13.3'
-    id 'babric-loom-extension' version '1.13.3'
+    id 'fabric-loom' version '1.17.20'
+    id 'babric-loom-extension' version '1.16.1'
     id "com.modrinth.minotaur" version "2.+"
 }
 
@@ -178,14 +178,4 @@ tasks.withType(GenerateModuleMetadata).configureEach {
 // Gradle 9 fails the build if there are no tests, but we are using the test package for a test mod
 tasks.withType(Test).configureEach {
     failOnNoDiscoveredTests = false
-}
-
-java {
-    withSourcesJar()
-}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_" + base.archivesName.get() }
-    }
 }

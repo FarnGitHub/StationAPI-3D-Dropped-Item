@@ -5,12 +5,14 @@ import farn.threeD_item.handler.VanillaItemRenderer;
 import farn.threeD_item.handler.apron.ApronStapiHandler;
 import farn.threeD_item.handler.apron.ApronHandler;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.modificationstation.stationapi.api.client.model.item.ItemWithRenderer;
 import net.modificationstation.stationapi.api.client.texture.Sprite;
 import net.modificationstation.stationapi.api.client.texture.SpriteAtlasTexture;
 import net.modificationstation.stationapi.api.item.BlockItemForm;
@@ -53,7 +55,9 @@ public class StapiItemRenderer {
                     glTranslatef(spinX, spinY, spinZ);
                 }
 
-                if(!Dropped3DItem.apron || ApronHandler.skipVanillaBlockRender(stack, itemRenderer.blockRenderer, stack.getDamage(), item.getBrightnessAtEyes(delta)))
+                if(stack.getItem() instanceof ItemWithRenderer renderer)
+                    renderer.renderItemInWorld(itemRenderer, Minecraft.INSTANCE.textRenderer, Minecraft.INSTANCE.textureManager, stack, item.getBrightnessAtEyes(delta));
+                else if(!Dropped3DItem.apron || ApronHandler.skipVanillaBlockRender(stack, itemRenderer.blockRenderer, stack.getDamage(), item.getBrightnessAtEyes(delta)))
                     itemRenderer.blockRenderer.render(block, stack.getDamage(), item.getBrightnessAtEyes(delta));
                 glPopMatrix();
             }
@@ -85,6 +89,8 @@ public class StapiItemRenderer {
                 float b = (float) (rgb & 255) / 255.0F;
                 float brightness = item.getBrightnessAtEyes(delta);
                 glColor4f(r * brightness, g * brightness, b * brightness, 1.0F);
+            } else {
+                glColor4f(1F, 1F, 1F, 1F);
             }
 
             Tessellator tessellator = Tessellator.INSTANCE;

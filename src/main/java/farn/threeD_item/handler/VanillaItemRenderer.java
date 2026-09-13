@@ -23,15 +23,15 @@ public class VanillaItemRenderer {
             GL11.glPushMatrix();
             float yOffset = MathHelper.sin(((float)ent.age + yaw) / 10.0F + ent.initialRotationAngle) * 0.1F + 0.1F;
             float rotation = (((float)ent.age + yaw) / 20.0F + ent.initialRotationAngle) * 57.295776F;
-            byte mergeType;
+            byte amount;
             if(stack.count < 2) {
-                mergeType = 1;
+                amount = 1;
             } else if(stack.count < 16) {
-                mergeType = 2;
+                amount = 2;
             } else if(stack.count < 32) {
-                mergeType = 3;
+                amount = 3;
             } else {
-                mergeType = 4;
+                amount = 4;
             }
 
             GL11.glTranslatef((float)x, (float)y + yOffset, (float)z);
@@ -47,13 +47,12 @@ public class VanillaItemRenderer {
                     ApronHandler.bindTexture(block);
                 float size = 0.25F;
                 int render = block.getRenderType();
-                if(render == 1 || render == 19 || render == 12 || render == 2) {
+                if(render == 1 || render == 19 || render == 12 || render == 2)
                     size = 0.5F;
-                }
 
                 GL11.glScalef(size, size, size);
 
-                for(int loop = 0; loop < mergeType; ++loop) {
+                for(int loop = 0; loop < amount; ++loop) {
                     GL11.glPushMatrix();
                     if(loop > 0) {
                         float xOff = (renderer.random.nextFloat() * 2.0F - 1.0F) * 0.2F / size;
@@ -73,13 +72,13 @@ public class VanillaItemRenderer {
 
                 if(renderer.useCustomDisplayColor) {
                     int color = Item.ITEMS[stack.itemId].getColorMultiplier(0);
-                    float r = (float)(color >> 16 & 255) / 255.0F;
-                    float g = (float)(color >> 8 & 255) / 255.0F;
-                    float b = (float)(color & 255) / 255.0F;
                     float brightness = ent.getBrightnessAtEyes(1.0F);
-                    renderDroppedItem(renderer, stack, textureId, mergeType, block, r * brightness, g * brightness, b * brightness, rotation);
+                    float r = (float)(color >> 16 & 255) / 255.0F * brightness;
+                    float g = (float)(color >> 8 & 255) / 255.0F * brightness;
+                    float b = (float)(color & 255) / 255.0F * brightness;
+                    renderDroppedItem(renderer, stack, block, r, g, b, rotation, amount);
                 } else {
-                    renderDroppedItem(renderer, stack, textureId, mergeType, block, 1.0F, 1.0F, 1.0F, rotation);
+                    renderDroppedItem(renderer, stack, block, 1F, 1F, 1F, rotation, amount);
                 }
             }
 
@@ -88,16 +87,17 @@ public class VanillaItemRenderer {
         }
     }
 
-    private static void renderDroppedItem(ItemRenderer renderer, ItemStack stack, int texture, int mergeType, Block block, float r, float g, float b, float rotation) {
+    private static void renderDroppedItem(ItemRenderer renderer, ItemStack stack, Block block, float r, float g, float b, float rotation, int amount) {
         Tessellator tess = Tessellator.INSTANCE;
+        int texture = stack.getTextureId();
         float minU = (float)(texture % 16 * 16) / 256.0F;
         float maxU = (float)(texture % 16 * 16 + 16) / 256.0F;
         float minV = (float)(texture / 16 * 16) / 256.0F;
         float maxV = (float)(texture / 16 * 16 + 16) / 256.0F;
         GL11.glPushMatrix();
         GL11.glRotatef(rotation, 0.0F, 1.0F, 0.0F);
-        GL11.glTranslatef(-0.5F, -0.25F, -(0.084375F * (float)mergeType / 2.0F));
-        for(int loop = 0; loop < mergeType; ++loop) {
+        GL11.glTranslatef(-0.5F, -0.25F, -(0.084375F * (float)amount / 2.0F));
+        for(int loop = 0; loop < amount; ++loop) {
             GL11.glTranslatef(0.0F, 0.0F, 0.084375F);
             renderer.bindTexture(
                     block != null ? "/terrain.png" : "/gui/items.png"

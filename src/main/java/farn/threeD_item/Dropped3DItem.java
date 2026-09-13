@@ -8,12 +8,12 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 
 public class Dropped3DItem {
-    public static boolean renderDroppedItem = true;
-    public static boolean enabled = true;
 
     public static File cFile = new File(FabricLoader.getInstance().getConfigDir().toFile(), "3D_dropped_item.cfg");
+    public static boolean enabled = true;
 
     public static final boolean apron = FabricLoader.getInstance().isModLoaded("apron");
+    public static boolean renderDroppedItem = true;
 
     private Dropped3DItem() {}
 
