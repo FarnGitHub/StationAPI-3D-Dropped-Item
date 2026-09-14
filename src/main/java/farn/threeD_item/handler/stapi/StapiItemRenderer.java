@@ -39,8 +39,8 @@ public class StapiItemRenderer {
     ) {
         glPushMatrix();
         glTranslatef(x, y + yOffset, z);
-        Block block;
-        if (stack.getItem() instanceof BlockItemForm blockI && BlockRenderManager.isSideLit((block = blockI.getBlock()).getRenderType())) {
+        Block block = getBlock(stack.getItem());
+        if (block != null) {
             glRotatef(rotateOffset, 0.0F, 1.0F, 0.0F);
             atlas.bindTexture();
             float renderScale = 0.25F;
@@ -55,8 +55,8 @@ public class StapiItemRenderer {
                     glTranslatef(spinX, spinY, spinZ);
                 }
 
-                if(stack.getItem() instanceof ItemWithRenderer renderer)
-                    renderer.renderItemInWorld(itemRenderer, Minecraft.INSTANCE.textRenderer, Minecraft.INSTANCE.textureManager, stack, item.getBrightnessAtEyes(delta));
+                if (stack.getItem() instanceof ItemWithRenderer)
+                    ((ItemWithRenderer)stack.getItem()).renderItemInWorld(itemRenderer, Minecraft.INSTANCE.textRenderer, Minecraft.INSTANCE.textureManager, stack, item.getBrightnessAtEyes(delta));
                 else if(!Dropped3DItem.apron || ApronHandler.skipVanillaBlockRender(stack, itemRenderer.blockRenderer, stack.getDamage(), item.getBrightnessAtEyes(delta)))
                     itemRenderer.blockRenderer.render(block, stack.getDamage(), item.getBrightnessAtEyes(delta));
                 glPopMatrix();
@@ -107,5 +107,13 @@ public class StapiItemRenderer {
             glPopMatrix();
         }
         glPopMatrix();
+    }
+
+    private static Block getBlock(Item item) {
+        if(item instanceof BlockItemForm) {
+            BlockItemForm blockI = (BlockItemForm)item;
+            return BlockRenderManager.isSideLit((blockI.getBlock()).getRenderType()) ? blockI.getBlock() : null;
+        }
+        return null;
     }
 }

@@ -89,6 +89,7 @@ dependencies {
 
     modImplementation("net.modificationstation:StationAPI:${project.stapi_version}") {
         exclude group: "babric", module: "fabric-loader"
+        exclude group: "com.github.mineLdiver", module: "UnsafeEvents"
     }
 
     if (project.hasProperty("modmenu_version")) {
@@ -167,7 +168,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 17
+    it.options.release = 8
 }
 
 // Disables the generation of the .module file
